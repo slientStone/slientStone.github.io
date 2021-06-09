@@ -28,6 +28,84 @@
     </entry>
     
     
+    
+    <entry>
+      <title>开发中遇到的小bug</title>
+      <link href="2020/08/21/daily20200821/"/>
+      <url>2020/08/21/daily20200821/</url>
+      
+        <content type="html"><![CDATA[<p>​<br>​​<br>1.fixed定位<br>问题描述：底部定位中发现，在safari会中有一个卡顿，然后才找到预期定位位置。</p><p>原因：代码中，外层包裹元素采用了同样的fixed，但没有设定bottom等方位的值，设置后恢复正常。</p><p>2.ios的时间格式<br>问题描述：xxxx-xx-xx格式的时间格式在safari中，new Date无法正常使用，会出现NAN</p><p>原因：safari不支持该日期格式，转变格式即可解决问题。</p><p>/* 转换为时间戳 */<br>function formatTimeStamp(date){<br>    return Date.parse(new Date(date)) || Date.parse(new Date(date.replace(/-/g,’/‘)));<br>}<br>formatTimeStamp(‘2017-11-11’);</p><p>追加：</p><p>问题描述： “2021-02-06T10:52:48.000+0800” 的时间格式在部分ios机型中，new Date无法正常使用，会出现aN:aN:aN</p><p>原因：机型不支持该格式</p><p>let nTime = item.createTime;<br>if(nTime.indexOf(‘T’)!=-1){<br>    nTime = nTime.replace(‘T’,’ ‘);<br>    let nIndex = nTime.indexOf(‘.’);<br>    nTime = nTime.substring(0,nIndex);<br>    nTime = nTime.replace(/[-]/g,’/‘);<br>}<br>3.toFixed的四舍五入<br>前言：toFixed是Javascript中常用来将number 四舍五入为指定小数位数的方法。</p><p>问题描述：做一个商城项目计算金额的时候，使用了toFixed(2)，发现有时候会出现并没有四舍五入的情况。在小数位数比较多的情况下，保留两位，进位的末尾是5，如果5后不存在或是0则不进位，否则进。</p><p>例：1.045.toFixed(2) =&gt; 1.04,  1.0451.toFixed(2) =&gt; 1.05。</p><p>以下是网上找到的代码，也可以用如:Math.round(X * 100) / 100处理，项目用到的地方比较多，使用了以下方式</p><p>export function toFixedFun (data, len){<br>  // debugger<br>  const number = Number(data);<br>  if (isNaN(number) || number &gt;= Math.pow(10, 21)) {<br>    return number.toString();<br>  }<br>  if (typeof (len) === ‘undefined’ || len === 0) {<br>    return (Math.round(number)).toString();<br>  }<br>  let result = number.toString();<br>  const numberArr = result.split(‘.’);</p><p>  if (numberArr.length &lt; 2) {<br>    // 整数的情况<br>    return padNum(result);<br>  }<br>  const intNum = numberArr[0]; // 整数部分<br>  const deciNum = numberArr[1];// 小数部分<br>  const lastNum = deciNum.substr(len, 1);// 最后一个数字</p><p>  if (deciNum.length === len) {<br>    // 需要截取的长度等于当前长度<br>    return result;<br>  }<br>  if (deciNum.length &lt; len) {<br>    // 需要截取的长度大于当前长度 1.3.toFixed(2)<br>    return padNum(result);<br>  }<br>  // 需要截取的长度小于当前长度，需要判断最后一位数字<br>  result = <code>$&#123;intNum&#125;.$&#123;deciNum.substr(0, len)&#125;</code>;<br>  if (parseInt(lastNum, 10) &gt;= 5) {<br>    // 最后一位数字大于5，要进位<br>    const times = Math.pow(10, len); // 需要放大的倍数<br>    let changedInt = Number(result.replace(‘.’, ‘’));// 截取后转为整数<br>    changedInt++; // 整数进位<br>    changedInt /= times;// 整数转为小数，注：有可能还是整数<br>    result = padNum(<code>$&#123;changedInt &#125;</code>);<br>  }<br>  return result;<br>  // 对数字末尾加0<br>  function padNum(num) {<br>    const dotPos = num.indexOf(‘.’);<br>    if (dotPos === -1) {<br>      // 整数的情况<br>      num += ‘.’;<br>      for (let i = 0; i &lt; len; i++) {<br>        num += ‘0’;<br>      }<br>      return num;<br>    } else {<br>      // 小数的情况<br>      const need = len - (num.length - dotPos - 1);<br>      for (let j = 0; j &lt; need; j++) {<br>        num += ‘0’;<br>      }<br>      return num;<br>    }<br>  }<br>}<br>4.el-table对不齐<br>问题描述：当el-table中，项比较多的时候，出现对不齐的情况。</p><p>//全局增加<br>.el-table th {<br>    display: table-cell!important;<br>}<br>5.animation动画导致的模糊<br>问题描述：uniapp项目中导航的定位伪类使用了动画，导致下方文字模糊</p><p>解决方式：加上z-index，模糊消失</p><p>6.阿里巴巴图标库svg图标需去色处理<br>问题描述：部分svg图标使用中无法变更颜色</p><p>解决方式：在图标库中对图标进行去色处理</p><p>​</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>图片上传涉及到的blob格式问题</title>
+      <link href="2020/08/19/daily20200819/"/>
+      <url>2020/08/19/daily20200819/</url>
+      
+        <content type="html"><![CDATA[<p>​<br>​</p><p>前言</p><p>Blob对象表示一个不可变、原始数据的类文件对象。Blob 表示的不一定是JavaScript原生格式的数据。File接口基于Blob，继承了 blob 的功能并将其扩展使其支持用户系统上的文件。</p><p>问题描述</p><p>使用vue-cropper插件进行图片切割头像，将切割后的头像转为blob文件上传，与后端对接的时候发现，blob的filename默认为‘blob’，导致后端接受数据的时候，无法根据上传图片的后缀名保存图片，全部为.blob文件，从而导致接口无法返回正确的url地址。这之中上传文件使用的是el-upload</p><p>注：vue-cropper插件可能只针对上传图片文件，不对单纯的图片进行处理，因此在初始化的展示的时候绕过去就好。</p><p>解决方法</p><p>  在图片上传后，取file.name进行保存，然后在上传到服务器前将blob文件格式转为file文件并重新命名。</p><p>以下为代码：</p><p>  // vue-cropper获取截取后的图片信息，此处data为blob格式</p><pre><code>this.$refs.cropper.getCropBlob(data =&gt; &#123;     let formData = new FormData();  // 项目整体格式上传采用form数据上传   var fileOfBlob = new File([data], this.imgName);   formData.append(&quot;avatarfile&quot;, fileOfBlob);   uploadAvatar(formData).then(response =&gt; &#123;      ...    &#125;);  &#125;);</code></pre><p>​</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>echarts图表使用-折线图的属性</title>
+      <link href="2020/07/29/daily20200729/"/>
+      <url>2020/07/29/daily20200729/</url>
+      
+        <content type="html"><![CDATA[<p>​<br>折现图中，相关参数记录</p><p>  title-text：显示标题，title-left:center：可居中文字，grid-top：调整上高度，tooltip-formatter：重设鼠标指示显示文字。</p><p> 为实现以下类似功能，需要设置tooltip-formatter：</p><pre><code>this.chart.setOption(&#123;    title: &#123;      text: &#39;记录&#39;      // left: &#39;center&#39;,      //         align: &#39;right&#39;    &#125;,    xAxis: &#123;      data: xData,      boundaryGap: false,      type: &#39;category&#39;    &#125;,    grid: &#123;      left: 10,      right: 10,      bottom: 20,      top: 30,      containLabel: true    &#125;,    tooltip: &#123;      trigger: &#39;axis&#39;,      axisPointer: &#123;        type: &#39;cross&#39;      &#125;,      padding: [5, 10],      // formatter: tooltipsFormatter      formatter: function(params, ticket, dataIndex) &#123;        let res = params[0].name;        for (let i = 0, l = params.length; i &lt; l; i++) &#123;          res += &#39;&lt;br/&gt;&#39; + params[i].marker + params[i].seriesName + &#39; : &#39; +           params[i].value + &#39;/&#39; + params[i].data.money;        &#125;        return res;      &#125;    &#125;,    yAxis: &#123;      axisTick: &#123;        show: false      &#125;,      axisLabel: &#123;        formatter: &#39;&#123;value&#125;&#39;      &#125;    &#125;,    legend: &#123;      data: legendData,      formatter: &#39;&#123;name&#125;&#39;    &#125;,    series: seriesData  &#125;);</code></pre>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>记一次处理ie兼容的思路</title>
+      <link href="2020/07/28/daily20200728/"/>
+      <url>2020/07/28/daily20200728/</url>
+      
+        <content type="html"><![CDATA[<p>问题：ie兼容性，es6文件没有处理</p><p>1.百度到插件 babel-polyfill ，说是能处理</p><p>2.加了之后无反应，搜索插件报错，说是webpack-dev-server版本，降级为2.6.1，无效，排除插件问题</p><p>3.插件走不通，回归正常思路，查看打包后源码，发现es6文件未处理，进行文件处理</p><p>4.走es6文件处理，查看此时处于stage-2,暴力加入es2015处理，文件报错，vuex的…mapstate方式报错</p><p>5.解决问题，找到使用stage-2可以进行正确编译，但无es2015处理ie浏览器报错，引入transform-object-rest-spread 处理vuex相关，去除stage-2</p><p>6.路由引用文件，例：cont home =（）=》import(‘/…/‘),报错，无法处理，更改为 import home from ‘…’</p><p>7.轮播插件出现问题，没有进行处理，暴力加入进行处理，文件报错</p><p>8.百度问题，发现降低swiper版本能解决，直接卸载swiper,引入2.6.7版本报错，操作无效</p><p>进行问题排除，察觉引入的是vue-awesome-swiper，直接搜索相关问题</p><p>9.解决vue-awesome-swiper版本问题，vue-awesome-swiper版本挂钩swiper版本，卸载插件安装<a href="mailto:&#x76;&#117;&#101;&#45;&#97;&#x77;&#101;&#x73;&#x6f;&#x6d;&#x65;&#x2d;&#x73;&#119;&#x69;&#112;&#x65;&#114;&#64;&#x32;&#x2e;&#x36;&#46;&#x37;">&#x76;&#117;&#101;&#45;&#97;&#x77;&#101;&#x73;&#x6f;&#x6d;&#x65;&#x2d;&#x73;&#119;&#x69;&#112;&#x65;&#114;&#64;&#x32;&#x2e;&#x36;&#46;&#x37;</a></p><p>相关：</p><p>npm install –save-dev</p><p>babel-polyfill npm uninstall webpack-dev-server</p><p>npm install <a href="mailto:&#x77;&#101;&#x62;&#112;&#x61;&#99;&#107;&#x2d;&#100;&#x65;&#x76;&#45;&#x73;&#101;&#x72;&#x76;&#x65;&#114;&#x40;&#50;&#x2e;&#x36;&#x2e;&#49;">&#x77;&#101;&#x62;&#112;&#x61;&#99;&#107;&#x2d;&#100;&#x65;&#x76;&#45;&#x73;&#101;&#x72;&#x76;&#x65;&#114;&#x40;&#50;&#x2e;&#x36;&#x2e;&#49;</a> –save-dev<br>npm install babel-plugin-transform-object-rest-spread –save-dev</p><p>npm install babel-preset-es2015 –save-dev<br>npm uninstall <a href="mailto:&#118;&#117;&#101;&#45;&#97;&#119;&#101;&#x73;&#111;&#109;&#x65;&#45;&#x73;&#119;&#x69;&#x70;&#x65;&#114;&#x40;&#50;&#46;&#x36;&#46;&#x37;">&#118;&#117;&#101;&#45;&#97;&#119;&#101;&#x73;&#111;&#109;&#x65;&#45;&#x73;&#119;&#x69;&#x70;&#x65;&#114;&#x40;&#50;&#46;&#x36;&#46;&#x37;</a> –save-dev</p><p>npm install <a href="mailto:&#x76;&#x75;&#101;&#x2d;&#97;&#119;&#101;&#115;&#111;&#x6d;&#x65;&#45;&#115;&#x77;&#105;&#112;&#x65;&#x72;&#64;&#50;&#46;&#x36;&#x2e;&#x37;">&#x76;&#x75;&#101;&#x2d;&#97;&#119;&#101;&#115;&#111;&#x6d;&#x65;&#45;&#115;&#x77;&#105;&#112;&#x65;&#x72;&#64;&#50;&#46;&#x36;&#x2e;&#x37;</a> –save-dev<br>​</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>wap2app中ios打包后路径跳转问题</title>
+      <link href="2020/07/09/daily20200709/"/>
+      <url>2020/07/09/daily20200709/</url>
+      
+        <content type="html"><![CDATA[<p>前言：wap2app是hbuild下的一个项目类型，直接通过地址链接生成原生App.</p><p>详情请看：<a href="https://ask.dcloud.net.cn/article/1244">https://ask.dcloud.net.cn/article/1244</a></p><p> </p><p>一、打包后的ios跳转链接出现问题，点击跳转出现loading，但是跳转没有执行。<br>   这是一个很少会出现的坑，首先我接手的是别人的项目，项目拿过来，检查了一下代码，发现大部分文件都是空的，就开始找源文件ios无法跳转的原因，在网上找了也发现有类似的人发了相关的兼容问题，但修改后都是无效，各种跳转尝试过后，开始怀疑打包文件的问题，尝试看wap2app的打包文档，也没有相关描述，后来在眼尖的同事的提醒下，成功察觉要素。也发觉为什么这个问题很少人会遇到了。</p><p> </p><p>注意事项：wap2app打包要注意相关的sitemap.json文件中的webviewId跟文件夹底下的css文件命名，这两个是想挂钩的，相对应的要一致。最好直接新建一个项目，是最保险的。<br>例：使用<a href="http://test.com新建的项目,对应的webviewid为/">http://test.com新建的项目，对应的webviewId为</a> “__W2A__test.com”，外部css文件名为”__W2A__test.com.append.css”</p><p> </p><p>二、去除原生导航栏<br>    修改sitemap.json文件里的配置，将全局的”global”导航”titleNView”设置为false，这一步设置后，发现导航栏还是在的，变成一个小的哭脸，发现没有办法用这种通用的设置，使用通配匹配所有页面设置”titleNView”设置为false就可以了。</p><p>ps:以下是代码，小心出现一、的问题，只需要后面common的一段就可以了。<br>{<br>    “global”: {<br>        “webviewParameter”: {<br>            // “titleNView”: false,<br>            “titleNView”: {<br>                “autoBackButton”: false,<br>                “backgroundColor”: “#fff”,<br>                “titleColor”: “#fff”,<br>                “titleSize”: “0”<br>            },<br>            “statusbar”: {<br>                “style”: “dark”<br>            },<br>            “appendCss”: “”,<br>            “appendJs”: “”<br>        },<br>         “easyConfig”: {}<br>    },<br>    “pages”: [{<br>            “webviewId”: “__W2A__test.com”, //首页<br>            “matchUrls”: [{<br>                “href”: “<a href="https://test.com&quot;/">https://test.com&quot;</a><br>            }, {<br>                “href”: “<a href="https://test.com/&quot;">https://test.com/&quot;</a><br>            }],<br>            “webviewParameter”: {<br>                “titleNView”: false,<br>                “statusbar”: {<br>                    “background”: “#f7f7f7”<br>                }<br>            }<br>        },<br>        {<br>            “webviewId”: “common”,<br>            “matchUrls”: [{<br>                “hostname”: “R:.”,<br>                “pathname”: “R:.”<br>            }],<br>            “webviewParameter”: {<br>                “titleNView”: false<br>            },<br>            “easyConfig”: {}<br>        }<br>    ]<br>}</p><p> </p><p>总结：sitemap.json中的”global”能设置全局样式，不包括能消除原生导航，原生导航的消除需要到具体页面匹配中消除。<br>​</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>mui下拉刷新的单页面设置</title>
+      <link href="2018/06/22/daily20180622/"/>
+      <url>2018/06/22/daily20180622/</url>
+      
+        <content type="html"><![CDATA[<p>简述在单页面应用中出现的问题</p><p>在开发过程中，项目中需要多个子页面的下拉刷新实现不同的效果，而mui的下拉刷新设置在第一次init之后，就会对后续页面进行影响，也就是说添加了一次下拉刷新之后，由于是单页面应用，就会导致整个单页面应用出现下拉刷新的功能。在这个地方有可能会出现下拉刷新的关闭语句报错。即：</p><p>mui(‘#pullrefresh’).pullRefresh().endPulldownToRefresh(false);<br>this.endPulldownToRefresh(false);<br>这两句关闭下拉刷新的语句会报 is not a funciton;</p><p>出现报错的原因：</p><p>在子页面中重复设置了mui的下拉刷新<br>在子页面进行初始化mui的下拉刷新（在当前页面可以实现，跳转到另一个子页面会报错）    <br>解决方法</p><p>在父页面设置，调用子页面的函数，关闭下拉刷新的语句写在父页面中；<br>在子页面设置，存储当前页面初始化中的(mui(‘****’).pullRefresh())为全局变量进行关闭下拉刷新，并在路由跳转中存储当前子页面的函数进行调用(vue中存储当前vue对象进行函数调用)。</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
   
   
 </search>
